@@ -43,7 +43,7 @@ export default function EditorPage({
 
   return (
     <div className="h-screen flex flex-col">
-      {/* <EditorToolbar templateId={templateId} /> */}
+      <EditorToolbar templateId={templateId} />
       <div className="flex-1 flex overflow-hidden">
         <EditorCanvas />
         <EditorSidebar />

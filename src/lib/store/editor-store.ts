@@ -7,7 +7,6 @@ interface EditorStore {
   state: EditorState;
   actions: {
     selectComponent: (id: string | null) => void;
-    // updateComponent: (id: string, updates: Partial<Component>) => void;
     addComponent: (component: Component, parentId?: string) => void;
     removeComponent: (id: string) => void;
     toggleVisibility: (id: string) => void;
@@ -15,8 +14,8 @@ interface EditorStore {
     redo: () => void;
     updateComponentPosition: (activeId: string, overId: string) => void;
     setDragging: (isDragging: boolean) => void;
-    setComponents: (components: Component[]) => void
-    updateComponent: (id: string, updates: Partial<Component>) => void
+    setComponents: (components: Component[]) => void;
+    updateComponent: (id: string, updates: Partial<Component>) => void;
   };
 }
 
@@ -139,23 +138,37 @@ export const useEditorStore = create(
           state.state.components = toggleInTree(state.state.components);
         }),
 
-      undo: () =>
-        set((state) => {
-          const lastState = state.state.history.past.pop();
-          if (lastState) {
-            state.state.history.future.push([...state.state.components]);
-            state.state.components = lastState;
-          }
-        }),
-
-      redo: () =>
-        set((state) => {
-          const nextState = state.state.history.future.pop();
-          if (nextState) {
-            state.state.history.past.push([...state.state.components]);
-            state.state.components = nextState;
-          }
-        }),
+        undo: () => {
+          const { past, future } = get().state.history;
+          const current = [...get().state.components];
+    
+          if (past.length === 0) return;
+    
+          const newPast = [...past];
+          const previous = newPast.pop();
+    
+          set((state) => {
+            state.state.components = previous || [];
+            state.state.history.past = newPast;
+            state.state.history.future = [current, ...future];
+          });
+        },
+    
+        redo: () => {
+          const { past, future } = get().state.history;
+          const current = [...get().state.components];
+    
+          if (future.length === 0) return;
+    
+          const newFuture = [...future];
+          const next = newFuture.shift();
+    
+          set((state) => {
+            state.state.components = next || [];
+            state.state.history.past = [...past, current];
+            state.state.history.future = newFuture;
+          });
+        },
 
       updateComponentPosition: (activeId: string, overId: string) =>
         set((state) => {

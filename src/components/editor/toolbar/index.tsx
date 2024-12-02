@@ -1,30 +1,31 @@
 // src/components/editor/toolbar/index.tsx
+import { useMemo } from 'react'
 import { Save, Undo, Redo, Eye, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useEditorStore } from "@/lib/store/editor-store"
 import { DevicePreview } from "./device-preview"
 import { PreviewModeToggle } from "./preview-mode-toggle"
 
-
 interface EditorToolbarProps {
   templateId: string
 }
 
 export function EditorToolbar({ templateId }: EditorToolbarProps) {
-  const { canUndo, canRedo, undo, redo } = useEditorStore((state) => ({
-    canUndo: state.state.history.past.length > 0,
-    canRedo: state.state.history.future.length > 0,
-    undo: state.actions.undo,
-    redo: state.actions.redo
-  }))
+  // Split into individual selectors to prevent unnecessary re-renders
+  const past = useEditorStore((state) => state.state.history.past)
+  const future = useEditorStore((state) => state.state.history.future)
+  const undo = useEditorStore((state) => state.actions.undo)
+  const redo = useEditorStore((state) => state.actions.redo)
+
+  // Memoize the computed values
+  const canUndo = useMemo(() => past.length > 0, [past])
+  const canRedo = useMemo(() => future.length > 0, [future])
 
   return (
-    
     <div className="h-14 border-b bg-background px-4">
       <div className="h-full flex items-center justify-between">
         {/* Left Section */}
         <div className="flex items-center gap-2">
-          {/* Logo/Back Button could go here */}
           <h1 className="font-semibold">Store Editor</h1>
         </div>
 
@@ -62,7 +63,6 @@ export function EditorToolbar({ templateId }: EditorToolbarProps) {
             variant="outline" 
             size="sm"
             onClick={() => {
-              // Handle save functionality
               console.log('Saving template...')
             }}
           >
