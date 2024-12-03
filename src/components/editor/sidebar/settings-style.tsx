@@ -35,7 +35,7 @@ export function SettingsStyle({ component }: SettingsStyleProps) {
         </Select>
       </div>
 
-      {/* Add more style options as needed */}
+      
     </div>
   )
 }

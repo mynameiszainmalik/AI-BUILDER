@@ -5,57 +5,96 @@ import { SettingsGeneral } from "./settings-general"
 import { NoSelection } from "./no-selection"
 import { SettingsStyle } from "./settings-style"
 import { SettingsAdvanced } from "./settings-advanced"
+import { SectionManager } from "./section-manager"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
+import { PageSettings } from "./page-settings"
 
 export function EditorSidebar() {
-  const selectedComponent = useEditorStore((state) => {
-    const selected = state.state.selectedComponent
-    if (!selected) return null
-    return state.state.components.find(c => c.id === selected)
-  })
-
-  if (!selectedComponent) {
-    return <NoSelection />
-  }
+  const selectedComponent = useEditorStore((state) => state.state.selectedComponent)
+  const component = useEditorStore((state) => 
+    state.state.components.find(c => c.id === state.state.selectedComponent)
+  )
 
   return (
-    <div className="w-80 border-l bg-background overflow-y-auto">
+    <div className="w-80 border-l bg-background flex flex-col">
       <div className="p-4 border-b">
         <h2 className="text-lg font-semibold">
-          {selectedComponent.type.charAt(0).toUpperCase() + selectedComponent.type.slice(1)} Settings
+          {component ? (
+            <>
+              {component.type.charAt(0).toUpperCase() + component.type.slice(1)} Settings
+            </>
+          ) : (
+            'Page Settings'
+          )}
         </h2>
       </div>
 
-      <Tabs defaultValue="general" className="w-full">
-        <TabsList className="w-full justify-start px-4 py-2 border-b">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="style">Style</TabsTrigger>
-          <TabsTrigger value="advanced">Advanced</TabsTrigger>
-        </TabsList>
-        <div className="p-4">
-          <TabsContent value="general">
-            <SettingsGeneral component={selectedComponent} />
-          </TabsContent>
-          <TabsContent value="style">
-            <SettingsStyle component={selectedComponent} />
-          </TabsContent>
-          <TabsContent value="advanced">
-            <SettingsAdvanced component={selectedComponent} />
-          </TabsContent>
+      <Tabs defaultValue="general" className="flex-1">
+        <div className="border-b">
+          <ScrollArea aria-orientation="horizontal">
+            <TabsList className="w-full justify-start p-0 h-12">
+              <TabsTrigger 
+                value="general"
+                className={cn(
+                  "flex-1 h-full rounded-none border-b-2 border-transparent",
+                  "data-[state=active]:border-primary"
+                )}
+              >
+                General
+              </TabsTrigger>
+              <TabsTrigger 
+                value="style"
+                className={cn(
+                  "flex-1 h-full rounded-none border-b-2 border-transparent",
+                  "data-[state=active]:border-primary"
+                )}
+              >
+                Style
+              </TabsTrigger>
+              <TabsTrigger 
+                value="sections"
+                className={cn(
+                  "flex-1 h-full rounded-none border-b-2 border-transparent",
+                  "data-[state=active]:border-primary"
+                )}
+              >
+                Sections
+              </TabsTrigger>
+              <TabsTrigger 
+                value="advanced"
+                className={cn(
+                  "flex-1 h-full rounded-none border-b-2 border-transparent",
+                  "data-[state=active]:border-primary"
+                )}
+              >
+                Advanced
+              </TabsTrigger>
+            </TabsList>
+          </ScrollArea>
         </div>
-      </Tabs>
 
-      {/* Reserved space for AI Prompt Interface */}
-      <div className="p-4 border-t">
-        {/* 
-          TODO: AI Prompt Integration
-          - Add chat-like interface for natural language modifications
-          - Implement real-time AI suggestions
-          - Add prompt templates for common modifications
-        */}
-        <div className="text-sm text-muted-foreground">
-          AI customization coming soon...
-        </div>
-      </div>
+        <ScrollArea className="flex-1">
+          <div className="p-4 space-y-8">
+            <TabsContent value="general" className="mt-0">
+              {component ? (
+                <SettingsGeneral component={component} />
+              ) : (
+                <PageSettings />
+              )}
+            </TabsContent>
+            <TabsContent value="style" className="mt-0">
+              {component && <SettingsStyle component={component} />}
+            </TabsContent>
+            <TabsContent value="sections" className="mt-0">
+              <SectionManager />
+            </TabsContent>
+            <TabsContent value="advanced" className="mt-0">
+              {component && <SettingsAdvanced component={component} />}
+            </TabsContent>
+          </div>
+        </ScrollArea>
+      </Tabs>
     </div>
   )
 }

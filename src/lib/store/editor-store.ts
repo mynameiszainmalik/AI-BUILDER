@@ -16,6 +16,9 @@ interface EditorStore {
     setDragging: (isDragging: boolean) => void;
     setComponents: (components: Component[]) => void;
     updateComponent: (id: string, updates: Partial<Component>) => void;
+    moveComponentUp: (id: string) => void;
+    moveComponentDown: (id: string) => void;
+    reorderComponents: (startIndex: number, endIndex: number) => void;
   };
 }
 
@@ -57,40 +60,30 @@ export const useEditorStore = create(
           })
         },
 
-      addComponent: (component: Component, parentId?: string) =>
-        set((state) => {
-          const addToParent = (components: Component[]): Component[] => {
-            return components.map(c => {
-              if (c.id === parentId) {
-                return {
-                  ...c,
-                  children: [...(c.children || []), component],
-                };
+        addComponent: (component: Component, afterId?: string) => 
+          set((state) => {
+            // Save current state to history
+            state.state.history.past.push([...state.state.components]);
+            state.state.history.future = [];
+        
+            if (afterId) {
+              // Find the index where to insert the new component
+              const index = state.state.components.findIndex(c => c.id === afterId);
+              if (index !== -1) {
+                state.state.components.splice(index + 1, 0, component);
+              } else {
+                state.state.components.push(component);
               }
-              if (c.children?.length) {
-                return {
-                  ...c,
-                  children: addToParent(c.children),
-                };
-              }
-              return c;
+            } else {
+              // Add to the beginning if no afterId is provided
+              state.state.components.unshift(component);
+            }
+        
+            // Update order properties
+            state.state.components.forEach((c, i) => {
+              c.order = i;
             });
-          };
-
-          // Save current state to history
-          state.state.history.past.push([...state.state.components]);
-          state.state.history.future = [];
-
-          // Add component
-          if (parentId) {
-            state.state.components = addToParent(state.state.components);
-          } else {
-            state.state.components.push({
-              ...component,
-              order: state.state.components.length,
-            });
-          }
-        }),
+          }),
 
       removeComponent: (id: string) =>
         set((state) => {
@@ -207,7 +200,69 @@ export const useEditorStore = create(
           state.state.isDragging = isDragging;
         }),
 
+        moveComponentUp: (id: string) => 
+          set((state) => {
+            const components = state.state.components;
+            const index = components.findIndex(c => c.id === id);
+            
+            if (index > 0) {
+              // Save to history before moving
+              state.state.history.past.push([...components]);
+              state.state.history.future = [];
+  
+              // Swap components
+              [components[index - 1], components[index]] = 
+              [components[index], components[index - 1]];
+  
+              // Update order property
+              components.forEach((c, i) => {
+                c.order = i;
+              });
+            }
+          }),
+  
+        moveComponentDown: (id: string) => 
+          set((state) => {
+            const components = state.state.components;
+            const index = components.findIndex(c => c.id === id);
+            
+            if (index < components.length - 1) {
+              // Save to history before moving
+              state.state.history.past.push([...components]);
+              state.state.history.future = [];
+  
+              // Swap components
+              [components[index], components[index + 1]] = 
+              [components[index + 1], components[index]];
+  
+              // Update order property
+              components.forEach((c, i) => {
+                c.order = i;
+              });
+            }
+          }),
+  
+        reorderComponents: (startIndex: number, endIndex: number) =>
+          set((state) => {
+            const components = state.state.components;
+            
+            // Save to history before reordering
+            state.state.history.past.push([...components]);
+            state.state.history.future = [];
+  
+            // Reorder components
+            const [removed] = components.splice(startIndex, 1);
+            components.splice(endIndex, 0, removed);
+  
+            // Update order property
+            components.forEach((c, i) => {
+              c.order = i;
+            });
+          }),
+
         
     },
+    
+    
   }))
 );
