@@ -14,6 +14,16 @@ const config: Config = {
   			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
 			'grid-pattern': 'linear-gradient(to right, #f0f0f0 1px, transparent 1px), linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)',
   		},
+
+		  keyframes: {
+			"preview-resize": {
+			  "0%": {  transform: "scale(0.98)" },
+			  "100%": { transform: "scale(1)" }
+			}
+		  },
+		  animation: {
+			"preview-resize": "preview-resize 0.2s ease-out"
+		  },
 		backgroundSize: {
 			'grid-pattern': '20px 20px',
 		},

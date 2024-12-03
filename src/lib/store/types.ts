@@ -1,3 +1,5 @@
+import { DeviceType } from "./editor-store";
+
 // src/lib/store/types.ts
 export type ComponentType = 'header' | 'hero' | 'features' | 'productGrid' | 'footer';
 
@@ -14,6 +16,7 @@ export interface Component {
 
 export interface EditorState {
   selectedComponent: string | null
+  devicePreview: DeviceType
   components: Component[]
   isDragging: boolean
   history: {

@@ -3,8 +3,11 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { Component, EditorState } from './types';
 
+export type DeviceType = 'mobile' | 'tablet' | 'desktop';
+
 interface EditorStore {
   state: EditorState;
+ 
   actions: {
     selectComponent: (id: string | null) => void;
     addComponent: (component: Component, parentId?: string) => void;
@@ -19,6 +22,9 @@ interface EditorStore {
     moveComponentUp: (id: string) => void;
     moveComponentDown: (id: string) => void;
     reorderComponents: (startIndex: number, endIndex: number) => void;
+    setDevicePreview: (device: DeviceType) => void;
+    
+    
   };
 }
 
@@ -28,6 +34,7 @@ export const useEditorStore = create(
   immer<EditorStore>((set, get) => ({
     state: {
      selectedComponent: null,
+     devicePreview: 'desktop',
     components: [],
     isDragging: false,
     history: {
@@ -262,6 +269,14 @@ export const useEditorStore = create(
               c.order = i;
             });
           }),
+
+          setDevicePreview: (device) => 
+            set((state) => {
+              state.state.devicePreview = device
+            }),
+          
+
+          
 
         
     },

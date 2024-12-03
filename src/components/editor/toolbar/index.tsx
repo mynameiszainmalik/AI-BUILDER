@@ -1,6 +1,6 @@
 // src/components/editor/toolbar/index.tsx
 import { useMemo } from 'react'
-import { Save, Undo, Redo, Eye, Settings } from "lucide-react"
+import { Save, Undo, Redo } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useEditorStore } from "@/lib/store/editor-store"
 import { DevicePreview } from "./device-preview"
@@ -11,7 +11,7 @@ interface EditorToolbarProps {
 }
 
 export function EditorToolbar({ templateId }: EditorToolbarProps) {
-  // Split into individual selectors to prevent unnecessary re-renders
+  
   const past = useEditorStore((state) => state.state.history.past)
   const future = useEditorStore((state) => state.state.history.future)
   const undo = useEditorStore((state) => state.actions.undo)
