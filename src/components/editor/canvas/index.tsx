@@ -4,9 +4,10 @@ import { useEditorStore } from "@/lib/store/editor-store"
 import { PreviewFrame } from "./preview-frame"
 import { CanvasDropZone } from "./canvas-drop-zone"
 import { ComponentRenderer } from "./component-renderer"
+import { SectionDivider } from "./section-divider"
+import React from "react"
 
 export function EditorCanvas() {
-  // Use specific selectors instead of whole state objects
   const components = useEditorStore((state) => state.state.components)
   const isDragging = useEditorStore((state) => state.state.isDragging)
 
@@ -15,12 +16,22 @@ export function EditorCanvas() {
       <DndContext>
         <PreviewFrame>
           <CanvasDropZone>
-            {components.map((component) => (
-              <ComponentRenderer 
-                key={component.id}
-                component={component}
-              />
+            {components.map((component, index) => (
+              <React.Fragment key={component.id}>
+                {index > 0 && (
+                  <SectionDivider beforeComponentId={component.id} />
+                )}
+                <ComponentRenderer 
+                  component={component}
+                />
+              </React.Fragment>
             ))}
+            {/* Add a final divider at the bottom */}
+            {components.length > 0 && (
+              <SectionDivider 
+                beforeComponentId={components[components.length - 1].id} 
+              />
+            )}
           </CanvasDropZone>
         </PreviewFrame>
       </DndContext>

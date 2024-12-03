@@ -60,29 +60,32 @@ export const useEditorStore = create(
           })
         },
 
-        addComponent: (component: Component, afterId?: string) => 
+        addComponent: (component: Component, beforeId?: string) => 
           set((state) => {
-            // Save current state to history
-            state.state.history.past.push([...state.state.components]);
-            state.state.history.future = [];
+            const components = state.state.components
+            
+            // Save to history
+            state.state.history.past.push([...components])
+            state.state.history.future = []
         
-            if (afterId) {
-              // Find the index where to insert the new component
-              const index = state.state.components.findIndex(c => c.id === afterId);
+            if (beforeId) {
+              // Find the index where to insert
+              const index = components.findIndex(c => c.id === beforeId)
               if (index !== -1) {
-                state.state.components.splice(index + 1, 0, component);
+                // Insert before the specified component
+                components.splice(index, 0, component)
               } else {
-                state.state.components.push(component);
+                components.push(component)
               }
             } else {
-              // Add to the beginning if no afterId is provided
-              state.state.components.unshift(component);
+              // Add to the end if no beforeId
+              components.push(component)
             }
         
-            // Update order properties
-            state.state.components.forEach((c, i) => {
-              c.order = i;
-            });
+            // Update order
+            components.forEach((c, i) => {
+              c.order = i
+            })
           }),
 
       removeComponent: (id: string) =>
